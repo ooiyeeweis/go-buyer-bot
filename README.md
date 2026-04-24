@@ -1,4 +1,4 @@
-# Serene Space Tracker Bot
+# GO Buyer Tracker Bot
 
 A Telegram bot for Group Order (GO) buyers to self-serve their order status, backed by a Google Sheets spreadsheet managed by the admin.
 
