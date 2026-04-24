@@ -6,12 +6,14 @@ import http from 'http';
 
 // TASK-305: Status emoji mapping
 const STATUS_EMOJIS = {
-  "Secured":      "🧾",
-  "In Warehouse": "📦",
-  "In Transit":   "✈️",
-  "Arrived":      "🏠",
-  "Completed":    "✅",
-  "Default":      "❓"
+  "Ordered / Secured": "🧾",
+  "Preparing To Ship": "📦",
+  "In Transit To MY": "✈️",
+  "Arrived in MY WH": "🏢",
+  "OTW to Admin's House": "🚚",
+  "Arrived at Admin's House": "🏠",
+  "Shipped / Completed": "✅",
+  "Default": "❓"
 };
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
@@ -32,8 +34,7 @@ bot.start(async (ctx) => {
   ctx.replyWithMarkdown(
     `✨ *Welcome to Serene Space Tracker!* ✨\n\n` +
     `Your Telegram ID is: \`${telegramId}\`\n\n` +
-    `Use /check to see your Group Order status.\n` +
-    `Use /myid if the admin needs your Telegram ID.`
+    `Use /check to see your Group Order status.`
   );
 
   if (!telegramUsername) return;
@@ -62,13 +63,6 @@ bot.start(async (ctx) => {
   } catch (err) {
     console.error("Start sheet update error:", err);
   }
-});
-
-// TASK-403: /myid — quick ID lookup
-bot.command('myid', (ctx) => {
-  ctx.replyWithMarkdown(
-    `🆔 *Your Telegram ID is:* \`${ctx.from.id}\`\n\nGive this to the admin to link your orders!`
-  );
 });
 
 // TASK-301, 304, 305: /check — core order lookup with status grouping
