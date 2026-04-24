@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { Telegraf } from 'telegraf';
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { JWT } from 'google-auth-library';
+import http from 'http';
 
 // TASK-305: Status emoji mapping
 const STATUS_EMOJIS = {
@@ -17,7 +18,7 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const serviceAccountAuth = new JWT({
   email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-  key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+  key: process.env.GOOGLE_PRIVATE_KEY.replace(/"/g, '').replace(/\\n/g, '\n'), 
   scopes: ['https://www.googleapis.com/auth/spreadsheets'],
 });
 
@@ -128,7 +129,12 @@ async function sendLongMessage(ctx, text) {
 }
 
 bot.launch();
-console.log('🚀 Bot is running! Send /check in Telegram to test.');
+console.log('🚀 Production Bot is active.');
 
-process.once('SIGINT',  () => bot.stop('SIGINT'));
+const PORT = process.env.PORT || 3000;
+http.createServer((req, res) => res.end('Bot is alive!')).listen(PORT, () => {
+  console.log(`🌐 Dummy server listening on port ${PORT} to keep Render happy`);
+});
+
+process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
