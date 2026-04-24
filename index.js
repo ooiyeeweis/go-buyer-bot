@@ -24,14 +24,44 @@ const serviceAccountAuth = new JWT({
 
 const doc = new GoogleSpreadsheet(process.env.SPREADSHEET_ID, serviceAccountAuth);
 
-// TASK-403: /start — welcome + show ID upfront
-bot.start((ctx) => {
+// /start — welcome, show ID, and auto-fill USER_ID in sheet by username match
+bot.start(async (ctx) => {
+  const telegramId = ctx.from.id.toString();
+  const telegramUsername = ctx.from.username || "";
+
   ctx.replyWithMarkdown(
     `✨ *Welcome to Serene Space Tracker!* ✨\n\n` +
-    `Your Telegram ID is: \`${ctx.from.id}\`\n\n` +
+    `Your Telegram ID is: \`${telegramId}\`\n\n` +
     `Use /check to see your Group Order status.\n` +
     `Use /myid if the admin needs your Telegram ID.`
   );
+
+  if (!telegramUsername) return;
+
+  try {
+    await doc.loadInfo();
+    const buyerSheet = doc.sheetsByTitle['BUYER_LIST'];
+    const rows = await buyerSheet.getRows();
+
+    let updated = 0;
+    for (const row of rows) {
+      const sheetUsername = (row.get('USERNAME') || '').toString().trim();
+      const existingId    = (row.get('USER_ID')  || '').toString().trim();
+
+      if (sheetUsername.toLowerCase() !== telegramUsername.toLowerCase()) continue;
+      if (existingId === telegramId) continue;
+
+      row.set('USER_ID', telegramId);
+      await row.save();
+      updated++;
+    }
+
+    if (updated > 0) {
+      ctx.replyWithMarkdown(`✅ Your Telegram ID has been linked to your order${updated > 1 ? 's' : ''} automatically!`);
+    }
+  } catch (err) {
+    console.error("Start sheet update error:", err);
+  }
 });
 
 // TASK-403: /myid — quick ID lookup
@@ -81,7 +111,7 @@ bot.command('check', async (ctx) => {
       foundMatch = true;
 
       // Support both current (GO_BATCH_ID / TRACKING_STATUS) and new column names
-      const batchId   = (row.get('BATCH_ID')        || row.get('GO_BATCH_ID')      || '').toString().trim();
+      const batchId   = (row.get('BATCH_ID') || row.get('GO_BATCH_ID')      || '').toString().trim();
       const item      = (row.get('ITEM')             || '').toString().trim();
       const rowStatus = (row.get('STATUS')           || row.get('TRACKING_STATUS')  || '').toString().trim();
 
