@@ -129,8 +129,11 @@ bot.command('check', async (ctx) => {
     // TASK-304 & 305: build grouped message with status emoji headers
     let message = "🔍 *Your Order Status:*\n\n";
     for (const status in buckets) {
-      const emoji = STATUS_EMOJIS[status] || STATUS_EMOJIS["Default"];
+      
+      const emojiKey = Object.keys(STATUS_EMOJIS).find(k => k !== "Default" && k.toLowerCase() === status.toLowerCase());
+      const emoji = emojiKey ? STATUS_EMOJIS[emojiKey] : STATUS_EMOJIS["Default"];
       message += `${emoji} *${status.toUpperCase()}*\n`;
+      console.log(`[DEBUG] status="${status}" → emoji=${emoji}`);
       message += buckets[status].join("\n") + "\n\n";
     }
 
