@@ -7,8 +7,10 @@ import http from 'http';
 // TASK-305: Status emoji mapping
 const STATUS_EMOJIS = {
   "Ordered / Secured": "🧾",
+  "Secured": "🧾",
   "Preparing To Ship": "📦",
   "In Transit To MY": "✈️",
+  "Arrived At My WH": "🏢",
   "Arrived in MY WH": "🏢",
   "OTW to Admin's House": "🚚",
   "Arrived at Admin's House": "🏠",
